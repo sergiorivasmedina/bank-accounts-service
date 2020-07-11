@@ -11,6 +11,7 @@ public class BankAccount {
     private String idBankAccount;
     private double availableBalance;
     private String accountType;
+    private String currency;
     private List<String> idCustomer; //Spanish: Titulares de la cuenta -> Customers
     private List<String> authorizedSignatories; //Spanish: Firmantes autorizados -> Customers
     private List<String> transactions;
@@ -18,10 +19,11 @@ public class BankAccount {
     public BankAccount() {
     }
 
-    public BankAccount(String idBankAccount, double availableBalance, String accountType, List<String> idCustomer, List<String> authorizedSignatories, List<String> transactions) {
+    public BankAccount(String idBankAccount, double availableBalance, String accountType, String currency, List<String> idCustomer, List<String> authorizedSignatories, List<String> transactions) {
         this.idBankAccount = idBankAccount;
         this.availableBalance = availableBalance;
         this.accountType = accountType;
+        this.currency = currency;
         this.idCustomer = idCustomer;
         this.authorizedSignatories = authorizedSignatories;
         this.transactions = transactions;
@@ -49,6 +51,14 @@ public class BankAccount {
 
     public void setAccountType(String accountType) {
         this.accountType = accountType;
+    }
+
+    public String getCurrency() {
+        return this.currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 
     public List<String> getIdCustomer() {
@@ -81,6 +91,7 @@ public class BankAccount {
             " idBankAccount='" + getIdBankAccount() + "'" +
             ", availableBalance='" + getAvailableBalance() + "'" +
             ", accountType='" + getAccountType() + "'" +
+            ", currency='" + getCurrency() + "'" +
             ", idCustomer='" + getIdCustomer() + "'" +
             ", authorizedSignatories='" + getAuthorizedSignatories() + "'" +
             ", transactions='" + getTransactions() + "'" +

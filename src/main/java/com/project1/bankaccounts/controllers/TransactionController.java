@@ -27,7 +27,7 @@ public class TransactionController {
     @Autowired
     private TransactionRepository transactionRepository;
 
-    @GetMapping(value = "/transaction")
+    @GetMapping(value = "/transactions")
     public @ResponseBody Flux<Transaction> getAllTransactions() {
         // list all data in transaction collection
         return transactionRepository.findAll();

@@ -2,6 +2,8 @@ package com.project1.bankaccounts.models;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -11,6 +13,8 @@ public class Transaction {
     private String idAccountTransaction;
     private Double amount;
     private String transactionType;
+    
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy")
     private Date creationDate;
 
     public Transaction() {
