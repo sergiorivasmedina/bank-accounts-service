@@ -10,19 +10,21 @@ public class BankAccount {
     @Id
     private String idBankAccount;
     private double availableBalance;
-    private AccountType accountType;
-    private List<String> accountHolder;
-    private AuthorizedSignatory authorizedSignatories;
+    private String accountType;
+    private List<String> idCustomer; //Spanish: Titulares de la cuenta -> Customers
+    private List<String> authorizedSignatories; //Spanish: Firmantes autorizados -> Customers
+    private List<String> transactions;
 
     public BankAccount() {
     }
 
-    public BankAccount(String idBankAccount, double availableBalance, AccountType accountType, List<String> accountHolder, AuthorizedSignatory authorizedSignatories) {
+    public BankAccount(String idBankAccount, double availableBalance, String accountType, List<String> idCustomer, List<String> authorizedSignatories, List<String> transactions) {
         this.idBankAccount = idBankAccount;
         this.availableBalance = availableBalance;
         this.accountType = accountType;
-        this.accountHolder = accountHolder;
+        this.idCustomer = idCustomer;
         this.authorizedSignatories = authorizedSignatories;
+        this.transactions = transactions;
     }
 
     public String getIdBankAccount() {
@@ -41,28 +43,36 @@ public class BankAccount {
         this.availableBalance = availableBalance;
     }
 
-    public AccountType getAccountType() {
+    public String getAccountType() {
         return this.accountType;
     }
 
-    public void setAccountType(AccountType accountType) {
+    public void setAccountType(String accountType) {
         this.accountType = accountType;
     }
 
-    public List<String> getAccountHolder() {
-        return this.accountHolder;
+    public List<String> getIdCustomer() {
+        return this.idCustomer;
     }
 
-    public void setAccountHolder(List<String> accountHolder) {
-        this.accountHolder = accountHolder;
+    public void setIdCustomer(List<String> idCustomer) {
+        this.idCustomer = idCustomer;
     }
 
-    public AuthorizedSignatory getAuthorizedSignatories() {
+    public List<String> getAuthorizedSignatories() {
         return this.authorizedSignatories;
     }
 
-    public void setAuthorizedSignatories(AuthorizedSignatory authorizedSignatories) {
+    public void setAuthorizedSignatories(List<String> authorizedSignatories) {
         this.authorizedSignatories = authorizedSignatories;
+    }
+
+    public List<String> getTransactions() {
+        return this.transactions;
+    }
+
+    public void setTransactions(List<String> transactions) {
+        this.transactions = transactions;
     }
 
     @Override
@@ -71,8 +81,9 @@ public class BankAccount {
             " idBankAccount='" + getIdBankAccount() + "'" +
             ", availableBalance='" + getAvailableBalance() + "'" +
             ", accountType='" + getAccountType() + "'" +
-            ", accountHolder='" + getAccountHolder() + "'" +
+            ", idCustomer='" + getIdCustomer() + "'" +
             ", authorizedSignatories='" + getAuthorizedSignatories() + "'" +
+            ", transactions='" + getTransactions() + "'" +
             "}";
     }
 }

@@ -5,22 +5,20 @@ import java.util.Date;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "accountTransaction")
-public class AccountTransaction {
+@Document(collection = "transaction")
+public class Transaction {
     @Id
     private String idAccountTransaction;
     private Double amount;
-    private BankAccount bankAccount;
-    private TransactionType transactionType;
+    private String transactionType;
     private Date creationDate;
 
-    public AccountTransaction() {
+    public Transaction() {
     }
 
-    public AccountTransaction(String idAccountTransaction, Double amount, BankAccount bankAccount, TransactionType transactionType, Date creationDate) {
+    public Transaction(String idAccountTransaction, Double amount, String transactionType, Date creationDate) {
         this.idAccountTransaction = idAccountTransaction;
         this.amount = amount;
-        this.bankAccount = bankAccount;
         this.transactionType = transactionType;
         this.creationDate = creationDate;
     }
@@ -41,19 +39,11 @@ public class AccountTransaction {
         this.amount = amount;
     }
 
-    public BankAccount getBankAccount() {
-        return this.bankAccount;
-    }
-
-    public void setBankAccount(BankAccount bankAccount) {
-        this.bankAccount = bankAccount;
-    }
-
-    public TransactionType getTransactionType() {
+    public String getTransactionType() {
         return this.transactionType;
     }
 
-    public void setTransactionType(TransactionType transactionType) {
+    public void setTransactionType(String transactionType) {
         this.transactionType = transactionType;
     }
 
@@ -70,7 +60,6 @@ public class AccountTransaction {
         return "{" +
             " idAccountTransaction='" + getIdAccountTransaction() + "'" +
             ", amount='" + getAmount() + "'" +
-            ", bankAccount='" + getBankAccount() + "'" +
             ", transactionType='" + getTransactionType() + "'" +
             ", creationDate='" + getCreationDate() + "'" +
             "}";
