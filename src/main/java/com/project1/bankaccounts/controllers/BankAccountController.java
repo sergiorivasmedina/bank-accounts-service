@@ -1,7 +1,5 @@
 package com.project1.bankaccounts.controllers;
 
-import java.util.List;
-
 import com.project1.bankaccounts.models.BankAccount;
 import com.project1.bankaccounts.models.Transaction;
 import com.project1.bankaccounts.repositories.BankAccountRepository;
@@ -34,8 +32,6 @@ public class BankAccountController {
     private BankAccountRepository bankAccountRepository;
     @Autowired
     private TransactionRepository transactionRepository;
-
-    private static final Logger log = LoggerFactory.getLogger(BankAccountController.class);
 
     @GetMapping(value = "/accounts")
     public @ResponseBody Flux<BankAccount> getAllAccounts() {
