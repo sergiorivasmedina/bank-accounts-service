@@ -1,8 +1,14 @@
 package com.project1.bankaccounts.controllers;
 
-import com.project1.bankaccounts.models.BankAccount;
-import com.project1.bankaccounts.repositories.BankAccountRepository;
+import java.util.List;
 
+import com.project1.bankaccounts.models.BankAccount;
+import com.project1.bankaccounts.models.Transaction;
+import com.project1.bankaccounts.repositories.BankAccountRepository;
+import com.project1.bankaccounts.repositories.TransactionRepository;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +32,10 @@ public class BankAccountController {
     
     @Autowired
     private BankAccountRepository bankAccountRepository;
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    private static final Logger log = LoggerFactory.getLogger(BankAccountController.class);
 
     @GetMapping(value = "/accounts")
     public @ResponseBody Flux<BankAccount> getAllAccounts() {
@@ -86,10 +96,23 @@ public class BankAccountController {
     }
 
     //check balance
-    @GetMapping(value = "/account/check-balance/{accountId}")
+    @GetMapping(value = "/account/check/balance/{accountId}")
     public Mono<ResponseEntity<Double>> checkBalance(@PathVariable(name = "accountId") String accountId) {
         return bankAccountRepository.findById(accountId)
                 .map(account -> new ResponseEntity<>(account.getAvailableBalance(), HttpStatus.OK))
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    //check transactions
+    @GetMapping(value = "/account/check/transactions/{accountId}")
+    public Flux<Transaction> checkTransactions(@PathVariable(name = "accountId") String accountId) {
+        Mono<BankAccount> bankAccount = bankAccountRepository.findById(accountId);
+        Flux<String> transactions = bankAccount
+                                        .map(BankAccount::getTransactions)
+                                        .flatMapMany((Flux::fromIterable));
+        
+        return transactions.flatMap(tran -> {
+            return transactionRepository.findById(tran);
+        }).collectList().flatMapMany(Flux::fromIterable);
     }
 }
