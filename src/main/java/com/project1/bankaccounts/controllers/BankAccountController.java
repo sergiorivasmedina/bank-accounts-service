@@ -40,7 +40,7 @@ public class BankAccountController {
     }
 
     @PutMapping(value = "/account/{accountId}")
-    public Mono <ResponseEntity<BankAccount>> updateCredit(@PathVariable(name = "accountId") String accountId, @RequestBody BankAccount account) {
+    public Mono<ResponseEntity<BankAccount>> updateAccount(@PathVariable(name = "accountId") String accountId, @RequestBody BankAccount account) {
         return bankAccountRepository.findById(accountId)
             .flatMap(existingAccount -> {
                 return bankAccountRepository.save(account);
@@ -57,5 +57,39 @@ public class BankAccountController {
                     .then(Mono.just(new ResponseEntity<Void>(HttpStatus.OK))) 
             )
             .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    //Deposit money
+    @PutMapping(value = "/account/deposit/{accountId}/{amount}")
+    public Mono<ResponseEntity<BankAccount>> deposit(@PathVariable(name = "accountId") String accountId, @PathVariable(name = "amount") Double amount) {
+        return bankAccountRepository.findById(accountId)
+            .flatMap(existingAccount -> {
+                //update availableBalance
+                existingAccount.setAvailableBalance(existingAccount.getAvailableBalance() + amount);
+                return bankAccountRepository.save(existingAccount);
+            })
+            .map(updateAccount -> new ResponseEntity<>(updateAccount, HttpStatus.OK))
+            .defaultIfEmpty((new ResponseEntity<>(HttpStatus.NOT_FOUND)));
+    }
+
+    //withdraw money
+    @PutMapping(value = "/account/withdraw/{accountId}/{amount}")
+    public Mono<ResponseEntity<BankAccount>> withdraw(@PathVariable(name = "accountId") String accountId, @PathVariable(name = "amount") Double amount) {
+        return bankAccountRepository.findById(accountId)
+            .flatMap(existingAccount -> {
+                //update availableBalance
+                existingAccount.setAvailableBalance(existingAccount.getAvailableBalance() - amount);
+                return bankAccountRepository.save(existingAccount);
+            })
+            .map(updateAccount -> new ResponseEntity<>(updateAccount, HttpStatus.OK))
+            .defaultIfEmpty((new ResponseEntity<>(HttpStatus.NOT_FOUND)));
+    }
+
+    //check balance
+    @GetMapping(value = "/account/check-balance/{accountId}")
+    public Mono<ResponseEntity<Double>> checkBalance(@PathVariable(name = "accountId") String accountId) {
+        return bankAccountRepository.findById(accountId)
+                .map(account -> new ResponseEntity<>(account.getAvailableBalance(), HttpStatus.OK))
+                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 }
