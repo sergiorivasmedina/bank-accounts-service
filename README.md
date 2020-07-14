@@ -11,4 +11,4 @@ docker run --restart always --name accounts -8080:9000 -d accounts:latest
 ### Sonarqube
 docker run -d --name sonarqube -p 8090:9000 sonarqube
 
-![Screenshot](arquitectura.png)
+![Arquitectura](arquitectura.png)
