@@ -6,8 +6,8 @@ import static org.mockito.Mockito.times;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.project1.bankaccounts.models.AccountType;
-import com.project1.bankaccounts.repositories.AccountTypeRepository;
+import com.project1.bankaccounts.models.Currency;
+import com.project1.bankaccounts.repositories.CurrencyRepository;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,72 +24,71 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @ExtendWith(SpringExtension.class)
-@WebFluxTest(controllers = AccountTypeController.class)
-public class AccountTypeControllerTest {
-
+@WebFluxTest(controllers = CurrencyController.class)
+public class CurrencyControllerTest {
     @MockBean
-    AccountTypeRepository accountTypeRepository;
+    CurrencyRepository repository;
 
     @Autowired
     private WebTestClient webclient;
     
     @Test
-    public void getAllAccountTypes() {
-        AccountType accountType = new AccountType("1", "ahorro");
+    public void getAllCurrencies() {
+        Currency currency = new Currency("1","soles","S/");
 
-        List<AccountType> list = new ArrayList<AccountType>();
-        list.add(accountType);
+        List<Currency> list = new ArrayList<Currency>();
+        list.add(currency);
          
-        Flux<AccountType> accountFlux = Flux.fromIterable(list);
+        Flux<Currency> transactionTypeFlux = Flux.fromIterable(list);
 
         Mockito
-            .when(accountTypeRepository.findAll())
-            .thenReturn(accountFlux);
+            .when(repository.findAll())
+            .thenReturn(transactionTypeFlux);
 
         webclient.get()
-            .uri("/account/types")
+            .uri("/currencies")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus().isOk()
-            .expectBodyList(AccountType.class);
+            .expectBodyList(Currency.class);
 
-            Mockito.verify(accountTypeRepository, times(1)).findAll();
+            Mockito.verify(repository, times(1)).findAll();
     }
 
     @Test
-    public void newAccountType() {
-        AccountType accountType = new AccountType("1", "ahorro");
+    public void newCurrency() {
+        Currency currency = new Currency("1","soles","S/");
 
         Mockito
-            .when(accountTypeRepository.save(accountType))
-            .thenReturn(Mono.just(accountType));
+            .when(repository.save(currency))
+            .thenReturn(Mono.just(currency));
         
         webclient.post()
-            .uri("/account/type/new")
+            .uri("/currency/new")
             .contentType(MediaType.APPLICATION_JSON)
-            .body(BodyInserters.fromValue(accountType))
+            .body(BodyInserters.fromValue(currency))
             .exchange()
             .expectStatus().isOk()
-            .expectBody(AccountType.class);
+            .expectBody(Currency.class);
 
-        Mockito.verify(accountTypeRepository, times(1)).save(refEq(accountType));
+        Mockito.verify(repository, times(1)).save(refEq(currency));
     }
 
     @Test
     public void deleteAccountType() {
-        AccountType accountType = new AccountType("1", "ahorro");
+        Currency currency = new Currency("1","soles","S/");
 
         Mockito
-            .when(accountTypeRepository.findById("1"))
-            .thenReturn(Mono.just(accountType));
+            .when(repository.findById("1"))
+            .thenReturn(Mono.just(currency));
 
         Mono<Void> voidReturn  = Mono.empty();
         Mockito
-            .when(accountTypeRepository.delete(accountType))
+            .when(repository.delete(currency))
             .thenReturn(voidReturn);
 
 	    webclient.delete()
-                .uri("/account/type/{typeId}", accountType.getIdAccountType())
+                .uri("/currency/{currencyId}", currency.getIdCurrency())
                 .exchange()
                 .expectStatus().isOk();
     }
