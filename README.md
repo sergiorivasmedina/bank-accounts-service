@@ -1,8 +1,8 @@
-# project1-bank-accounts
+# Project2 - bank Accounts
 Java Spring Boot Backend connected to mongodb.
 
 ### Command for run Dockerfile and start container
-cd /project1-bank-accounts
+cd /bank-accounts
 
 docker build -t "accounts"
 
