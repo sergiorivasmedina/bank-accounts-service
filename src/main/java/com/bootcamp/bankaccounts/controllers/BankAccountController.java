@@ -2,8 +2,8 @@ package com.bootcamp.bankaccounts.controllers;
 
 import com.bootcamp.bankaccounts.models.BankAccount;
 import com.bootcamp.bankaccounts.models.Transaction;
-import com.bootcamp.bankaccounts.repositories.BankAccountRepository;
-import com.bootcamp.bankaccounts.repositories.TransactionRepository;
+import com.bootcamp.bankaccounts.services.BankAccountService;
+import com.bootcamp.bankaccounts.services.TransactionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,27 +27,27 @@ import reactor.core.publisher.Mono;
 public class BankAccountController {
     
     @Autowired
-    private BankAccountRepository bankAccountRepository;
+    private BankAccountService bankAccountService;
     @Autowired
-    private TransactionRepository transactionRepository;
+    private TransactionService transactionService;
 
     @GetMapping(value = "/accounts")
     public @ResponseBody Flux<BankAccount> getAllAccounts() {
         // list all data in bank account collection
-        return bankAccountRepository.findAll();
+        return bankAccountService.findAll();
     }
 
     @PostMapping(value = "/account/new")
     public Mono<BankAccount> newAccount(@RequestBody BankAccount newAccount) {
         // adding a new bank Account to the collection
-        return bankAccountRepository.save(newAccount);
+        return bankAccountService.save(newAccount);
     }
 
     @PutMapping(value = "/account/{accountId}")
     public Mono<ResponseEntity<BankAccount>> updateAccount(@PathVariable(name = "accountId") String accountId, @RequestBody BankAccount account) {
-        return bankAccountRepository.findById(accountId)
+        return bankAccountService.findById(accountId)
             .flatMap(existingAccount -> {
-                return bankAccountRepository.save(account);
+                return bankAccountService.save(account);
             })
             .map(updateAccount -> new ResponseEntity<>(updateAccount, HttpStatus.OK))
             .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -55,9 +55,9 @@ public class BankAccountController {
 
     @DeleteMapping(value = "/account/{accountId}")
     public Mono<ResponseEntity<Void>> deleteAccount(@PathVariable(name = "accountId") String accountId) {
-        return bankAccountRepository.findById(accountId)
+        return bankAccountService.findById(accountId)
             .flatMap(existingAccount ->
-                bankAccountRepository.delete(existingAccount)
+                bankAccountService.delete(existingAccount)
                     .then(Mono.just(new ResponseEntity<Void>(HttpStatus.OK))) 
             )
             .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -66,11 +66,11 @@ public class BankAccountController {
     //Deposit money
     @PutMapping(value = "/account/deposit/{accountId}/{amount}")
     public Mono<ResponseEntity<BankAccount>> deposit(@PathVariable(name = "accountId") String accountId, @PathVariable(name = "amount") Double amount) {
-        return bankAccountRepository.findById(accountId)
+        return bankAccountService.findById(accountId)
             .flatMap(existingAccount -> {
                 //update availableBalance
                 existingAccount.setAvailableBalance(existingAccount.getAvailableBalance() + amount);
-                return bankAccountRepository.save(existingAccount);
+                return bankAccountService.save(existingAccount);
             })
             .map(updateAccount -> new ResponseEntity<>(updateAccount, HttpStatus.OK))
             .defaultIfEmpty((new ResponseEntity<>(HttpStatus.NOT_FOUND)));
@@ -79,11 +79,11 @@ public class BankAccountController {
     //withdraw money
     @PutMapping(value = "/account/withdraw/{accountId}/{amount}")
     public Mono<ResponseEntity<BankAccount>> withdraw(@PathVariable(name = "accountId") String accountId, @PathVariable(name = "amount") Double amount) {
-        return bankAccountRepository.findById(accountId)
+        return bankAccountService.findById(accountId)
             .flatMap(existingAccount -> {
                 //update availableBalance
                 existingAccount.setAvailableBalance(existingAccount.getAvailableBalance() - amount);
-                return bankAccountRepository.save(existingAccount);
+                return bankAccountService.save(existingAccount);
             })
             .map(updateAccount -> new ResponseEntity<>(updateAccount, HttpStatus.OK))
             .defaultIfEmpty((new ResponseEntity<>(HttpStatus.NOT_FOUND)));
@@ -92,7 +92,7 @@ public class BankAccountController {
     //check balance
     @GetMapping(value = "/account/check/balance/{accountId}")
     public Mono<ResponseEntity<Double>> checkBalance(@PathVariable(name = "accountId") String accountId) {
-        return bankAccountRepository.findById(accountId)
+        return bankAccountService.findById(accountId)
                 .map(account -> new ResponseEntity<>(account.getAvailableBalance(), HttpStatus.OK))
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
@@ -100,13 +100,13 @@ public class BankAccountController {
     //check transactions
     @GetMapping(value = "/account/check/transactions/{accountId}")
     public Flux<Transaction> checkTransactions(@PathVariable(name = "accountId") String accountId) {
-        Mono<BankAccount> bankAccount = bankAccountRepository.findById(accountId);
+        Mono<BankAccount> bankAccount = bankAccountService.findById(accountId);
         Flux<String> transactions = bankAccount
                                         .map(BankAccount::getTransactions)
                                         .flatMapMany((Flux::fromIterable));
         
         return transactions.flatMap(tran -> {
-            return transactionRepository.findById(tran);
+            return transactionService.findById(tran);
         }).collectList().flatMapMany(Flux::fromIterable);
     }
 }

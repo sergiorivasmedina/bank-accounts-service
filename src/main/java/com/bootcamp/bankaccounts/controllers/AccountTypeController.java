@@ -1,7 +1,7 @@
 package com.bootcamp.bankaccounts.controllers;
 
 import com.bootcamp.bankaccounts.models.AccountType;
-import com.bootcamp.bankaccounts.repositories.AccountTypeRepository;
+import com.bootcamp.bankaccounts.services.AccountTypeService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,25 +25,25 @@ import reactor.core.publisher.Mono;
 public class AccountTypeController {
     
     @Autowired
-    private AccountTypeRepository accountTypeRepository;
+    private AccountTypeService accountTypeService;
 
     @GetMapping(value = "/account/types")
     public @ResponseBody Flux<AccountType> getAllAccountTypes() {
         // list all data in account type colection
-        return accountTypeRepository.findAll();
+        return accountTypeService.findAll();
     }
 
     @PostMapping(value = "/account/type/new")
     public Mono<AccountType> newAccountType(@RequestBody AccountType newtype) {
         // adding a new account type to the collection
-        return accountTypeRepository.save(newtype);
+        return accountTypeService.save(newtype);
     }
 
     @PutMapping(value = "/account/type/{typeId}")
     public Mono<ResponseEntity<AccountType>> updateAccountType(@PathVariable(name = "typeId") String typeId, @RequestBody AccountType type) {
-        return accountTypeRepository.findById(typeId)
+        return accountTypeService.findById(typeId)
             .flatMap(existingType -> {
-                return accountTypeRepository.save(type);
+                return accountTypeService.save(type);
             })
             .map(updateType -> new ResponseEntity<>(updateType, HttpStatus.OK))
             .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -51,9 +51,9 @@ public class AccountTypeController {
 
     @DeleteMapping(value = "/account/type/{typeId}")
     public Mono<ResponseEntity<Void>> deleteAccountType(@PathVariable(name = "typeId") String typeId) {
-        return accountTypeRepository.findById(typeId)
+        return accountTypeService.findById(typeId)
             .flatMap(existingType ->
-                accountTypeRepository.delete(existingType)
+                accountTypeService.delete(existingType)
                     .then(Mono.just(new ResponseEntity<Void>(HttpStatus.OK))) 
             )
             .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));

@@ -1,7 +1,7 @@
 package com.bootcamp.bankaccounts.controllers;
 
 import com.bootcamp.bankaccounts.models.Currency;
-import com.bootcamp.bankaccounts.repositories.CurrencyRepository;
+import com.bootcamp.bankaccounts.services.CurrencyService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,25 +22,25 @@ import reactor.core.publisher.Mono;
 public class CurrencyController {
     
     @Autowired
-    private CurrencyRepository currencyRepository;
+    private CurrencyService currencyService;
 
     @GetMapping(value = "/currencies")
     public @ResponseBody Flux<Currency> getAllCurrencies() {
         // list all data in currency collection
-        return currencyRepository.findAll();
+        return currencyService.findAll();
     }
 
     @PostMapping(value = "/currency/new")
     public Mono<Currency> newCurrency(@RequestBody Currency newCurrency) {
         // adding a new currency to the collection
-        return currencyRepository.save(newCurrency);
+        return currencyService.save(newCurrency);
     }
 
     @PutMapping(value = "/currency/{currencyId}")
     public Mono<ResponseEntity<Currency>> updateCurrency(@PathVariable(name = "currencyId") String currencyId, @RequestBody Currency currency) {
-        return currencyRepository.findById(currencyId)
+        return currencyService.findById(currencyId)
             .flatMap(existingCurrency -> {
-                return currencyRepository.save(currency);
+                return currencyService.save(currency);
             })
             .map(updateCurrency -> new ResponseEntity<>(updateCurrency, HttpStatus.OK))
             .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -48,9 +48,9 @@ public class CurrencyController {
 
     @DeleteMapping(value = "/currency/{currencyId}")
     public Mono<ResponseEntity<Void>> deleteCurrency(@PathVariable(name = "currencyId") String currencyId) {
-        return currencyRepository.findById(currencyId)
+        return currencyService.findById(currencyId)
             .flatMap(existingCurrency ->
-                currencyRepository.delete(existingCurrency)
+                currencyService.delete(existingCurrency)
                     .then(Mono.just(new ResponseEntity<Void>(HttpStatus.OK))) 
             )
             .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
