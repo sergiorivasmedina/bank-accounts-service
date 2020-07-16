@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: bank-accounts
+  cloud:
+    config:
+      uri:
+      - http://localhost:8079
+      username: root
+      password: sergio
