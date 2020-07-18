@@ -1,0 +1,9 @@
+version: "3.5"
+
+services:
+  bank-accounts:
+    container_name: bank-accounts
+    build: .
+    restart: always
+    ports:
+      - 8081:8081
