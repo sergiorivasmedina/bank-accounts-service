@@ -68,8 +68,15 @@ public class BankAccountController {
     public Mono<ResponseEntity<BankAccount>> deposit(@PathVariable(name = "accountId") String accountId, @PathVariable(name = "amount") Double amount) {
         return bankAccountService.findById(accountId)
             .flatMap(existingAccount -> {
+                Double balance = existingAccount.getAvailableBalance();
+
+                //validate numberTransactionsRemainder
+                int numberRemainder = existingAccount.getNumberTransactionsRemainder();
+                if (numberRemainder == 0) balance -= existingAccount.getCommission();
+                else existingAccount.setNumberTransactionsRemainder(numberRemainder - 1);
+
                 //update availableBalance
-                existingAccount.setAvailableBalance(existingAccount.getAvailableBalance() + amount);
+                existingAccount.setAvailableBalance(balance + amount);
                 return bankAccountService.save(existingAccount);
             })
             .map(updateAccount -> new ResponseEntity<>(updateAccount, HttpStatus.OK))
@@ -81,8 +88,15 @@ public class BankAccountController {
     public Mono<ResponseEntity<BankAccount>> withdraw(@PathVariable(name = "accountId") String accountId, @PathVariable(name = "amount") Double amount) {
         return bankAccountService.findById(accountId)
             .flatMap(existingAccount -> {
+                Double balance = existingAccount.getAvailableBalance();
+                
+                //validate numberTransactionsRemainder
+                int numberRemainder = existingAccount.getNumberTransactionsRemainder();
+                if (numberRemainder == 0) balance -= existingAccount.getCommission();
+                else existingAccount.setNumberTransactionsRemainder(numberRemainder - 1);
+
                 //update availableBalance
-                existingAccount.setAvailableBalance(existingAccount.getAvailableBalance() - amount);
+                existingAccount.setAvailableBalance(balance - amount);
                 return bankAccountService.save(existingAccount);
             })
             .map(updateAccount -> new ResponseEntity<>(updateAccount, HttpStatus.OK))
