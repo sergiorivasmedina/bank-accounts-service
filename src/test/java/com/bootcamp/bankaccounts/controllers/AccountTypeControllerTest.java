@@ -27,70 +27,70 @@ import reactor.core.publisher.Mono;
 @WebFluxTest(controllers = AccountTypeController.class)
 public class AccountTypeControllerTest {
 
-    @MockBean
-    AccountTypeRepository accountTypeRepository;
+    // @MockBean
+    // AccountTypeRepository accountTypeRepository;
 
-    @Autowired
-    private WebTestClient webclient;
+    // @Autowired
+    // private WebTestClient webclient;
     
-    @Test
-    public void getAllAccountTypes() {
-        AccountType accountType = new AccountType("1", "ahorro");
+    // @Test
+    // public void getAllAccountTypes() {
+    //     AccountType accountType = new AccountType("1", "ahorro");
 
-        List<AccountType> list = new ArrayList<AccountType>();
-        list.add(accountType);
+    //     List<AccountType> list = new ArrayList<AccountType>();
+    //     list.add(accountType);
          
-        Flux<AccountType> accountFlux = Flux.fromIterable(list);
+    //     Flux<AccountType> accountFlux = Flux.fromIterable(list);
 
-        Mockito
-            .when(accountTypeRepository.findAll())
-            .thenReturn(accountFlux);
+    //     Mockito
+    //         .when(accountTypeRepository.findAll())
+    //         .thenReturn(accountFlux);
 
-        webclient.get()
-            .uri("/account/types")
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus().isOk()
-            .expectBodyList(AccountType.class);
+    //     webclient.get()
+    //         .uri("/account/types")
+    //         .accept(MediaType.APPLICATION_JSON)
+    //         .exchange()
+    //         .expectStatus().isOk()
+    //         .expectBodyList(AccountType.class);
 
-            Mockito.verify(accountTypeRepository, times(1)).findAll();
-    }
+    //         Mockito.verify(accountTypeRepository, times(1)).findAll();
+    // }
 
-    @Test
-    public void newAccountType() {
-        AccountType accountType = new AccountType("1", "ahorro");
+    // @Test
+    // public void newAccountType() {
+    //     AccountType accountType = new AccountType("1", "ahorro");
 
-        Mockito
-            .when(accountTypeRepository.save(accountType))
-            .thenReturn(Mono.just(accountType));
+    //     Mockito
+    //         .when(accountTypeRepository.save(accountType))
+    //         .thenReturn(Mono.just(accountType));
         
-        webclient.post()
-            .uri("/account/type/new")
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(BodyInserters.fromValue(accountType))
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody(AccountType.class);
+    //     webclient.post()
+    //         .uri("/account/type/new")
+    //         .contentType(MediaType.APPLICATION_JSON)
+    //         .body(BodyInserters.fromValue(accountType))
+    //         .exchange()
+    //         .expectStatus().isOk()
+    //         .expectBody(AccountType.class);
 
-        Mockito.verify(accountTypeRepository, times(1)).save(refEq(accountType));
-    }
+    //     Mockito.verify(accountTypeRepository, times(1)).save(refEq(accountType));
+    // }
 
-    @Test
-    public void deleteAccountType() {
-        AccountType accountType = new AccountType("1", "ahorro");
+    // @Test
+    // public void deleteAccountType() {
+    //     AccountType accountType = new AccountType("1", "ahorro");
 
-        Mockito
-            .when(accountTypeRepository.findById("1"))
-            .thenReturn(Mono.just(accountType));
+    //     Mockito
+    //         .when(accountTypeRepository.findById("1"))
+    //         .thenReturn(Mono.just(accountType));
 
-        Mono<Void> voidReturn  = Mono.empty();
-        Mockito
-            .when(accountTypeRepository.delete(accountType))
-            .thenReturn(voidReturn);
+    //     Mono<Void> voidReturn  = Mono.empty();
+    //     Mockito
+    //         .when(accountTypeRepository.delete(accountType))
+    //         .thenReturn(voidReturn);
 
-	    webclient.delete()
-                .uri("/account/type/{typeId}", accountType.getIdAccountType())
-                .exchange()
-                .expectStatus().isOk();
-    }
+	//     webclient.delete()
+    //             .uri("/account/type/{typeId}", accountType.getIdAccountType())
+    //             .exchange()
+    //             .expectStatus().isOk();
+    // }
 }
