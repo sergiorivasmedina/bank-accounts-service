@@ -16,11 +16,12 @@ import lombok.NoArgsConstructor;
 public class BankAccount {
     @Id
     private String idBankAccount;
-    private double availableBalance;
+    private Double availableBalance;
     private String accountType;
     private String currency;
     private List<String> idCustomer; //Spanish: Titulares de la cuenta -> Customers
     private List<String> authorizedSignatories; //Spanish: Firmantes autorizados -> Customers
     private List<String> transactions;
     private int numberTransactionsRemainder;
+    private double commission;
 }
