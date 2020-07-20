@@ -17,6 +17,12 @@ public class Transaction {
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy")
     private Date creationDate;
 
+    public Transaction(Double amount, String transactionType, Date creationDate) {
+        this.amount = amount;
+        this.transactionType = transactionType;
+        this.creationDate = creationDate;
+    }
+
     public Transaction() {
     }
 
