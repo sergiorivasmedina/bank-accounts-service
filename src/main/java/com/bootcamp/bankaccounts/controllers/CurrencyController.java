@@ -55,4 +55,11 @@ public class CurrencyController {
             )
             .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
+    @GetMapping(value = "/currency/search/{currencyId}")
+    public Mono<String> getCurrencyName(@PathVariable(name = "currencyId") String currencyId) {
+        return currencyService.findById(currencyId)
+                .map(Currency::getName)
+                .defaultIfEmpty("No se encontró moneda");
+    }
 }
