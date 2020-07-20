@@ -178,6 +178,7 @@ public class BankAccountController {
     //search account for this customerId
     @GetMapping(value = "/account/search/{customerId}")
     public Flux<BankAccount> searchAccountsByCustomerId(@PathVariable(name = "customerId") String customerId){
-        return bankAccountService.searchAccountsByCustomerId(customerId);
+        return bankAccountService.searchAccountsByCustomerId(customerId)
+                .defaultIfEmpty(new BankAccount("0",0.0,"No se encontró cuenta bancaria", "NA",null,null,null,0,0.0));
     }
 }

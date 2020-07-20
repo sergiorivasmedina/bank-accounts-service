@@ -1,7 +1,5 @@
 package com.bootcamp.bankaccounts.repositories;
 
-import java.util.List;
-
 import com.bootcamp.bankaccounts.models.BankAccount;
 
 import org.springframework.data.mongodb.repository.Query;

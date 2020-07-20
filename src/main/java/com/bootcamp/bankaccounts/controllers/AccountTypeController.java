@@ -58,4 +58,11 @@ public class AccountTypeController {
             )
             .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
+    //Search account type for each idAccountType
+    @GetMapping(value = "/account/type/search/{accountTypeId}")
+    public Mono<AccountType> searchAccountsByCustomerId(@PathVariable(name = "accountTypeId") String accountTypeId){
+        return accountTypeService.findById(accountTypeId)
+                .defaultIfEmpty(new AccountType("0", "No se encontró tipo de cuenta", 0.0, 0.0));
+    }
 }
