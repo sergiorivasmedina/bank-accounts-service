@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.bootcamp.bankaccounts.models.TransactionType;
-import com.bootcamp.bankaccounts.repositories.TransactionTypeRepository;
+import com.bootcamp.bankaccounts.services.TransactionTypeService;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,70 +26,70 @@ import reactor.core.publisher.Mono;
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(controllers = TransactionTypeController.class)
 public class TransactionTypeControllerTest {
-    // @MockBean
-    // TransactionTypeRepository repository;
+    @MockBean
+    TransactionTypeService service;
 
-    // @Autowired
-    // private WebTestClient webclient;
+    @Autowired
+    private WebTestClient webclient;
     
-    // @Test
-    // public void getAllTrasactionTypes() {
-    //     TransactionType transactionType = new TransactionType("1", "deposito");
+    @Test
+    public void getAllTrasactionTypes() {
+        TransactionType transactionType = new TransactionType("1", "deposito");
 
-    //     List<TransactionType> list = new ArrayList<TransactionType>();
-    //     list.add(transactionType);
+        List<TransactionType> list = new ArrayList<TransactionType>();
+        list.add(transactionType);
          
-    //     Flux<TransactionType> transactionTypeFlux = Flux.fromIterable(list);
+        Flux<TransactionType> transactionTypeFlux = Flux.fromIterable(list);
 
-    //     Mockito
-    //         .when(repository.findAll())
-    //         .thenReturn(transactionTypeFlux);
+        Mockito
+            .when(service.findAll())
+            .thenReturn(transactionTypeFlux);
 
-    //     webclient.get()
-    //         .uri("/transaction/types")
-    //         .accept(MediaType.APPLICATION_JSON)
-    //         .exchange()
-    //         .expectStatus().isOk()
-    //         .expectBodyList(TransactionType.class);
+        webclient.get()
+            .uri("/transaction/types")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk()
+            .expectBodyList(TransactionType.class);
 
-    //         Mockito.verify(repository, times(1)).findAll();
-    // }
+            Mockito.verify(service, times(1)).findAll();
+    }
 
-    // @Test
-    // public void newTransactionType() {
-    //     TransactionType transactionType = new TransactionType("1", "deposito");
+    @Test
+    public void newTransactionType() {
+        TransactionType transactionType = new TransactionType("1", "deposito");
 
-    //     Mockito
-    //         .when(repository.save(transactionType))
-    //         .thenReturn(Mono.just(transactionType));
+        Mockito
+            .when(service.save(transactionType))
+            .thenReturn(Mono.just(transactionType));
         
-    //     webclient.post()
-    //         .uri("/transaction/type/new")
-    //         .contentType(MediaType.APPLICATION_JSON)
-    //         .body(BodyInserters.fromValue(transactionType))
-    //         .exchange()
-    //         .expectStatus().isOk()
-    //         .expectBody(TransactionType.class);
+        webclient.post()
+            .uri("/transaction/type/new")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(BodyInserters.fromValue(transactionType))
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(TransactionType.class);
 
-    //     Mockito.verify(repository, times(1)).save(refEq(transactionType));
-    // }
+        Mockito.verify(service, times(1)).save(refEq(transactionType));
+    }
 
-    // @Test
-    // public void deleteTransactionType() {
-    //     TransactionType transactionType = new TransactionType("1", "deposito");
+    @Test
+    public void deleteTransactionType() {
+        TransactionType transactionType = new TransactionType("1", "deposito");
 
-    //     Mockito
-    //         .when(repository.findById("1"))
-    //         .thenReturn(Mono.just(transactionType));
+        Mockito
+            .when(service.findById("1"))
+            .thenReturn(Mono.just(transactionType));
 
-    //     Mono<Void> voidReturn  = Mono.empty();
-    //     Mockito
-    //         .when(repository.delete(transactionType))
-    //         .thenReturn(voidReturn);
+        Mono<Void> voidReturn  = Mono.empty();
+        Mockito
+            .when(service.delete(transactionType))
+            .thenReturn(voidReturn);
 
-	//     webclient.delete()
-    //             .uri("/transaction/type/{typeId}", transactionType.getIdTransactionType())
-    //             .exchange()
-    //             .expectStatus().isOk();
-    // }
+	    webclient.delete()
+                .uri("/transaction/type/{typeId}", transactionType.getIdTransactionType())
+                .exchange()
+                .expectStatus().isOk();
+    }
 }
