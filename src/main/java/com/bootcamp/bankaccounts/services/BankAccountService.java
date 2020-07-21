@@ -1,7 +1,5 @@
 package com.bootcamp.bankaccounts.services;
 
-import java.util.List;
-
 import com.bootcamp.bankaccounts.models.BankAccount;
 import com.bootcamp.bankaccounts.repositories.BankAccountRepository;
 

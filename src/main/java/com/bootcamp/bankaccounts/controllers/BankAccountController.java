@@ -1,12 +1,15 @@
 package com.bootcamp.bankaccounts.controllers;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 import com.bootcamp.bankaccounts.dto.CreditTransactionDTO;
 import com.bootcamp.bankaccounts.models.BankAccount;
+import com.bootcamp.bankaccounts.models.Commission;
 import com.bootcamp.bankaccounts.models.Transaction;
 import com.bootcamp.bankaccounts.services.BankAccountService;
+import com.bootcamp.bankaccounts.services.CommissionService;
 import com.bootcamp.bankaccounts.services.TransactionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +42,8 @@ public class BankAccountController {
     private BankAccountService bankAccountService;
     @Autowired
     private TransactionService transactionService;
+    @Autowired
+    private CommissionService commissionService;
 
     @GetMapping(value = "/accounts")
     public @ResponseBody Flux<BankAccount> getAllAccounts() {
@@ -73,13 +78,19 @@ public class BankAccountController {
     @PutMapping(value = "/account/deposit/{accountId}/{amount}/{transactionId}")
     public Mono<ResponseEntity<BankAccount>> deposit(@PathVariable(name = "accountId") String accountId,
             @PathVariable(name = "amount") Double amount, @PathVariable(name = "transactionId") String transactionId) {
+
         return bankAccountService.findById(accountId).flatMap(existingAccount -> {
             Double balance = existingAccount.getAvailableBalance();
 
             // validate numberTransactionsRemainder
             int numberRemainder = existingAccount.getNumberTransactionsRemainder();
-            if (numberRemainder == 0)
+            if (numberRemainder == 0){
                 balance -= existingAccount.getCommission();
+
+                //add data to Commission document
+                Commission commission = new Commission(Calendar.getInstance().getTime(),transactionId,accountId);
+                commissionService.save(commission).subscribe();
+            }
             else
                 existingAccount.setNumberTransactionsRemainder(numberRemainder - 1);
 
@@ -87,7 +98,13 @@ public class BankAccountController {
             existingAccount.setAvailableBalance(balance + amount);
 
             //update transactions
-            List<String> list = existingAccount.getTransactions();
+            List<String> list;
+            if (existingAccount.getTransactions() != null){
+                list = existingAccount.getTransactions();
+            } else {
+                list = new ArrayList<String>();
+            }
+            
             list.add(transactionId);
             existingAccount.setTransactions(list);
 
@@ -106,8 +123,13 @@ public class BankAccountController {
 
             // validate numberTransactionsRemainder
             int numberRemainder = existingAccount.getNumberTransactionsRemainder();
-            if (numberRemainder == 0)
+            if (numberRemainder == 0){
                 balance -= existingAccount.getCommission();
+
+                //add data to Commission document
+                Commission commission = new Commission(Calendar.getInstance().getTime(),transactionId,accountId);
+                commissionService.save(commission).subscribe();
+            }
             else
                 existingAccount.setNumberTransactionsRemainder(numberRemainder - 1);
 
@@ -115,7 +137,12 @@ public class BankAccountController {
             existingAccount.setAvailableBalance(balance - amount);
 
             //update transactions
-            List<String> list = existingAccount.getTransactions();
+            List<String> list;
+            if (existingAccount.getTransactions() != null){
+                list = existingAccount.getTransactions();
+            } else {
+                list = new ArrayList<String>();
+            }
             list.add(transactionId);
             existingAccount.setTransactions(list);
 

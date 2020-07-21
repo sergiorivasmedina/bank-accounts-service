@@ -61,8 +61,9 @@ public class AccountTypeController {
 
     //Search account type for each idAccountType
     @GetMapping(value = "/account/type/search/{accountTypeId}")
-    public Mono<AccountType> searchAccountsByCustomerId(@PathVariable(name = "accountTypeId") String accountTypeId){
+    public Mono<String> searchAccountNameByCustomerId(@PathVariable(name = "accountTypeId") String accountTypeId){
         return accountTypeService.findById(accountTypeId)
-                .defaultIfEmpty(new AccountType("0", "No se encontró tipo de cuenta", 0.0, 0.0));
+                .map(AccountType::getName)
+                .defaultIfEmpty("No se encontró tipo de cuenta");
     }
 }
