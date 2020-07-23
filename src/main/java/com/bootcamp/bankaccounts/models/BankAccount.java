@@ -24,4 +24,5 @@ public class BankAccount {
     private List<String> transactions;
     private int numberTransactionsRemainder;
     private double commission;
+    private String bankId;
 }
