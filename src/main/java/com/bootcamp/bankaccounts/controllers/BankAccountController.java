@@ -216,4 +216,12 @@ public class BankAccountController {
         return bankAccountService.searchAccountsByCustomerId(customerId)
                 .defaultIfEmpty(new BankAccount("0",0.0,"No se encontró cuenta bancaria", "NA",null,null,null,0,0.0,""));
     }
+
+    //Bank transfer
+    @GetMapping(value = "/account/bank-tranfer/{originAccountId}/{destinyAccountId}/{amount}")
+    public Mono<String> bankTranfer(@PathVariable(name = "originAccountId") String originId,
+            @PathVariable(name = "destinyAccountId") String destinyId, @PathVariable(name = "amount") Double amount) {
+                
+        return bankAccountService.bankTranfer(originId, destinyId, amount);
+    }
 }

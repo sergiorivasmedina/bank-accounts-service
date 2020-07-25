@@ -33,4 +33,26 @@ public class BankAccountService {
     public Flux<BankAccount> searchAccountsByCustomerId(String customerId) {
         return bankAccountRepository.findByIdCustomer(customerId);
     }
+
+    public Mono<String> bankTranfer(String originId, String destinyId, Double amount) {
+
+        return bankAccountRepository.findById(originId)
+                .filter(originAccount -> originAccount.getAvailableBalance() > amount)
+                .flatMap(originAccount -> {
+                    originAccount.setAvailableBalance(originAccount.getAvailableBalance() - amount);
+
+                    //search if exist destiny Account
+                    return bankAccountRepository.findById(destinyId)
+                        .flatMap(destinyAccount -> {
+                            destinyAccount.setAvailableBalance(destinyAccount.getAvailableBalance() + amount);
+
+                            //save accounts
+                            bankAccountRepository.save(originAccount).subscribe();
+                            return bankAccountRepository.save(destinyAccount)
+                                    .thenReturn("Transferencia Exitosa!");
+                        })
+                        .switchIfEmpty(Mono.just("No se encontró cuenta de destino."));
+                })
+                .switchIfEmpty(Mono.just("No se encontró cuenta origen."));
+    }
 }
