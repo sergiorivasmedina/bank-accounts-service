@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import com.bootcamp.bankaccounts.dto.CreditDTO;
 import com.bootcamp.bankaccounts.dto.CreditTransactionDTO;
 import com.bootcamp.bankaccounts.models.BankAccount;
 import com.bootcamp.bankaccounts.models.Commission;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -45,6 +47,8 @@ public class BankAccountController {
     @Autowired
     private CommissionService commissionService;
 
+    private final String creditsUri = "localhost:8083";
+
     @GetMapping(value = "/accounts")
     public @ResponseBody Flux<BankAccount> getAllAccounts() {
         // list all data in bank account collection
@@ -53,8 +57,12 @@ public class BankAccountController {
 
     @PostMapping(value = "/account/new")
     public Mono<BankAccount> newAccount(@RequestBody BankAccount newAccount) {
-        // adding a new bank Account to the collection
-        return bankAccountService.save(newAccount);
+        return WebClient.create(creditsUri + "/credit/search/expired-debt/status/" + newAccount.getIdCustomer().get(0) + "/1")
+                .get()
+                .retrieve()
+                .bodyToMono(CreditDTO.class)
+                .map(credit -> new BankAccount("No se pudo crear porque tiene deuda expirada."))
+                .switchIfEmpty(bankAccountService.save(newAccount));
     }
 
     @PutMapping(value = "/account/{accountId}")

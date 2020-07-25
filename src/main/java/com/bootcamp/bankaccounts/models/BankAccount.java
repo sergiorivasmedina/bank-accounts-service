@@ -25,4 +25,8 @@ public class BankAccount {
     private int numberTransactionsRemainder;
     private double commission;
     private String bankId;
+
+    public BankAccount(String idBankAccount) {
+        this.idBankAccount = idBankAccount;
+    }
 }
