@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import com.bootcamp.bankaccounts.dto.AccountDTO;
 import com.bootcamp.bankaccounts.dto.CreditDTO;
 import com.bootcamp.bankaccounts.dto.CreditTransactionDTO;
 import com.bootcamp.bankaccounts.dto.InitialEndDates;
@@ -227,7 +228,7 @@ public class BankAccountController {
     }
 
     @GetMapping(value = "/account/search/betweenDates/{bankId}")
-    public Flux<BankAccount> getAccountsBetweenDates(@PathVariable(name = "bankId") String bankId, @RequestBody InitialEndDates dates) {
+    public Flux<AccountDTO> getAccountsBetweenDates(@PathVariable(name = "bankId") String bankId, @RequestBody InitialEndDates dates) {
         return bankAccountService.getAccountsBetweenDates(dates.getInitialDate(), dates.getEndDate(), bankId);
     }
 }
