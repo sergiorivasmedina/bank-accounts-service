@@ -1,5 +1,7 @@
 package com.bootcamp.bankaccounts.services;
 
+import java.util.Date;
+
 import com.bootcamp.bankaccounts.models.BankAccount;
 import com.bootcamp.bankaccounts.repositories.BankAccountRepository;
 
@@ -34,7 +36,7 @@ public class BankAccountService {
         return bankAccountRepository.findByIdCustomer(customerId);
     }
 
-    public Mono<String> bankTranfer(String originId, String destinyId, Double amount) {
+    public Mono<String> bankTransfer(String originId, String destinyId, Double amount) {
 
         return bankAccountRepository.findById(originId)
                 .filter(originAccount -> originAccount.getAvailableBalance() > amount)
@@ -54,5 +56,12 @@ public class BankAccountService {
                         .switchIfEmpty(Mono.just("No se encontró cuenta de destino."));
                 })
                 .switchIfEmpty(Mono.just("No se encontró cuenta origen."));
+    }
+
+    public Flux<BankAccount> getAccountsBetweenDates(Date initialDate, Date endDate, String bankId) {
+        return bankAccountRepository.findAll()
+            .filter(account -> account.getBankId() != null && account.getBankId().compareTo(bankId) == 0)
+            .filter(account -> account.getCreatedAt() != null)
+            .filter(account -> account.getCreatedAt().compareTo(initialDate) > 0 && account.getCreatedAt().compareTo(endDate) < 0);
     }
 }

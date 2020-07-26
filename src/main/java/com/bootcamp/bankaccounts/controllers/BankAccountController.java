@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.bootcamp.bankaccounts.dto.CreditDTO;
 import com.bootcamp.bankaccounts.dto.CreditTransactionDTO;
+import com.bootcamp.bankaccounts.dto.InitialEndDates;
 import com.bootcamp.bankaccounts.models.BankAccount;
 import com.bootcamp.bankaccounts.models.Commission;
 import com.bootcamp.bankaccounts.models.Transaction;
@@ -214,14 +215,19 @@ public class BankAccountController {
     @GetMapping(value = "/account/search/{customerId}")
     public Flux<BankAccount> searchAccountsByCustomerId(@PathVariable(name = "customerId") String customerId){
         return bankAccountService.searchAccountsByCustomerId(customerId)
-                .defaultIfEmpty(new BankAccount("0",0.0,"No se encontró cuenta bancaria", "NA",null,null,null,0,0.0,""));
+                .defaultIfEmpty(new BankAccount("0",0.0,"No se encontró cuenta bancaria", "NA",null,null,null,0,0.0,"", Calendar.getInstance().getTime()));
     }
 
     //Bank transfer
-    @GetMapping(value = "/account/bank-tranfer/{originAccountId}/{destinyAccountId}/{amount}")
-    public Mono<String> bankTranfer(@PathVariable(name = "originAccountId") String originId,
+    @GetMapping(value = "/account/bank-transfer/{originAccountId}/{destinyAccountId}/{amount}")
+    public Mono<String> bankTransfer(@PathVariable(name = "originAccountId") String originId,
             @PathVariable(name = "destinyAccountId") String destinyId, @PathVariable(name = "amount") Double amount) {
                 
-        return bankAccountService.bankTranfer(originId, destinyId, amount);
+        return bankAccountService.bankTransfer(originId, destinyId, amount);
+    }
+
+    @GetMapping(value = "/account/search/betweenDates/{bankId}")
+    public Flux<BankAccount> getAccountsBetweenDates(@PathVariable(name = "bankId") String bankId, @RequestBody InitialEndDates dates) {
+        return bankAccountService.getAccountsBetweenDates(dates.getInitialDate(), dates.getEndDate(), bankId);
     }
 }

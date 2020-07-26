@@ -1,6 +1,9 @@
 package com.bootcamp.bankaccounts.models;
 
+import java.util.Date;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -25,6 +28,8 @@ public class BankAccount {
     private int numberTransactionsRemainder;
     private double commission;
     private String bankId;
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy")
+    private Date createdAt;
 
     public BankAccount(String idBankAccount) {
         this.idBankAccount = idBankAccount;
