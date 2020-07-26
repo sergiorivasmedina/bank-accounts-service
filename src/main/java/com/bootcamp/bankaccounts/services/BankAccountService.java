@@ -76,7 +76,8 @@ public class BankAccountService {
                 return accountTypeRepository.findById(account.getAccountType())
                         .map(type -> {
                             return new AccountDTO(account, type.getName(), type.getMinAmount(), type.getMinBalance());
-                        });
+                        })
+                        .switchIfEmpty(Mono.just(new AccountDTO(account, "No se encontró nombre.",null,null)));
             });
     }
 }
