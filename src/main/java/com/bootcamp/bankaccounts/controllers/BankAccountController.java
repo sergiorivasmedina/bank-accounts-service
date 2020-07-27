@@ -227,7 +227,7 @@ public class BankAccountController {
         return bankAccountService.bankTransfer(originId, destinyId, amount);
     }
 
-    @GetMapping(value = "/account/search/betweenDates/{bankId}")
+    @PostMapping(value = "/account/search/betweenDates/{bankId}")
     public Flux<AccountDTO> getAccountsBetweenDates(@PathVariable(name = "bankId") String bankId, @RequestBody InitialEndDates dates) {
         return bankAccountService.getAccountsBetweenDates(dates.getInitialDate(), dates.getEndDate(), bankId);
     }
