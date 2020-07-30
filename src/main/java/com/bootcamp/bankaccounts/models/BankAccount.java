@@ -26,6 +26,7 @@ public class BankAccount {
     private List<String> authorizedSignatories; //Spanish: Firmantes autorizados -> Customers
     private List<String> transactions;
     private int numberTransactionsRemainder;
+    private int numberOfAtmTransactions;
     private double commission;
     private String bankId;
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy")

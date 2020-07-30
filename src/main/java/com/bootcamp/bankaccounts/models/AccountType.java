@@ -17,4 +17,5 @@ public class AccountType {
     private String name;
     private Double minAmount;
     private Double minBalance; //saldo mínimo al final de mes
+    private int freeAtmTransactions;
 }

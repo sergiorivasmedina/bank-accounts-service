@@ -3,6 +3,7 @@ package com.bootcamp.bankaccounts.services;
 import java.util.Date;
 
 import com.bootcamp.bankaccounts.dto.AccountDTO;
+import com.bootcamp.bankaccounts.models.AccountType;
 import com.bootcamp.bankaccounts.models.BankAccount;
 import com.bootcamp.bankaccounts.repositories.AccountTypeRepository;
 import com.bootcamp.bankaccounts.repositories.BankAccountRepository;
@@ -76,5 +77,9 @@ public class BankAccountService {
                         })
                         .switchIfEmpty(Mono.just(new AccountDTO(account, "No se encontró nombre.",null,null)));
             });
+    }
+
+    public Mono<AccountType> getFreeAtmTransactions(String accountTypeId) {
+        return accountTypeRepository.findById(accountTypeId);
     }
 }

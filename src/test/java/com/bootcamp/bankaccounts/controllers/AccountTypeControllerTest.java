@@ -35,7 +35,7 @@ public class AccountTypeControllerTest {
     
     @Test
     public void getAllAccountTypes() {
-        AccountType accountType = new AccountType("1", "ahorro",0.0,0.0);
+        AccountType accountType = new AccountType("1", "ahorro",0.0,0.0,0);
 
         List<AccountType> list = new ArrayList<AccountType>();
         list.add(accountType);
@@ -58,7 +58,7 @@ public class AccountTypeControllerTest {
 
     @Test
     public void newAccountType() {
-        AccountType accountType = new AccountType("1", "ahorro",0.0,0.0);
+        AccountType accountType = new AccountType("1", "ahorro",0.0,0.0,0);
 
         Mockito
             .when(accountTypeService.save(accountType))
@@ -77,7 +77,7 @@ public class AccountTypeControllerTest {
 
     @Test
     public void deleteAccountType() {
-        AccountType accountType = new AccountType("1", "ahorro",0.0,0.0);
+        AccountType accountType = new AccountType("1", "ahorro",0.0,0.0,0);
 
         Mockito
             .when(accountTypeService.findById("1"))

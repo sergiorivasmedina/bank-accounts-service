@@ -59,10 +59,9 @@ public class BankAccountController {
 
     @PostMapping(value = "/account/new")
     public Mono<BankAccount> newAccount(@RequestBody BankAccount newAccount) {
-        return WebClient.create(creditsUri + "/credit/search/expired-debt/status/" + newAccount.getIdCustomer().get(0) + "/1")
-                .get()
-                .retrieve()
-                .bodyToMono(CreditDTO.class)
+        return WebClient
+                .create(creditsUri + "/credit/search/expired-debt/status/" + newAccount.getIdCustomer().get(0) + "/1")
+                .get().retrieve().bodyToMono(CreditDTO.class)
                 .map(credit -> new BankAccount("No se pudo crear porque tiene deuda expirada."))
                 .switchIfEmpty(bankAccountService.save(newAccount));
     }
@@ -94,27 +93,26 @@ public class BankAccountController {
 
             // validate numberTransactionsRemainder
             int numberRemainder = existingAccount.getNumberTransactionsRemainder();
-            if (numberRemainder == 0){
+            if (numberRemainder == 0) {
                 balance -= existingAccount.getCommission();
 
-                //add data to Commission document
-                Commission commission = new Commission(Calendar.getInstance().getTime(),transactionId,accountId);
+                // add data to Commission document
+                Commission commission = new Commission(Calendar.getInstance().getTime(), transactionId, accountId);
                 commissionService.save(commission).subscribe();
-            }
-            else
+            } else
                 existingAccount.setNumberTransactionsRemainder(numberRemainder - 1);
 
             // update availableBalance
             existingAccount.setAvailableBalance(balance + amount);
 
-            //update transactions
+            // update transactions
             List<String> list;
-            if (existingAccount.getTransactions() != null){
+            if (existingAccount.getTransactions() != null) {
                 list = existingAccount.getTransactions();
             } else {
                 list = new ArrayList<String>();
             }
-            
+
             list.add(transactionId);
             existingAccount.setTransactions(list);
 
@@ -133,22 +131,21 @@ public class BankAccountController {
 
             // validate numberTransactionsRemainder
             int numberRemainder = existingAccount.getNumberTransactionsRemainder();
-            if (numberRemainder == 0){
+            if (numberRemainder == 0) {
                 balance -= existingAccount.getCommission();
 
-                //add data to Commission document
-                Commission commission = new Commission(Calendar.getInstance().getTime(),transactionId,accountId);
+                // add data to Commission document
+                Commission commission = new Commission(Calendar.getInstance().getTime(), transactionId, accountId);
                 commissionService.save(commission).subscribe();
-            }
-            else
+            } else
                 existingAccount.setNumberTransactionsRemainder(numberRemainder - 1);
 
             // update availableBalance
             existingAccount.setAvailableBalance(balance - amount);
 
-            //update transactions
+            // update transactions
             List<String> list;
-            if (existingAccount.getTransactions() != null){
+            if (existingAccount.getTransactions() != null) {
                 list = existingAccount.getTransactions();
             } else {
                 list = new ArrayList<String>();
@@ -188,8 +185,9 @@ public class BankAccountController {
         String uri = "http://localhost:8083";
         String accountsUri = "http://localhost:8082";
 
-        //make a transaction in credit service
-        CreditTransactionDTO t = new CreditTransactionDTO(amount, Calendar.getInstance().getTime(), "5f090fcdd060b215471ec392");
+        // make a transaction in credit service
+        CreditTransactionDTO t = new CreditTransactionDTO(amount, Calendar.getInstance().getTime(),
+                "5f090fcdd060b215471ec392");
 
         RestTemplate restTemplate = new RestTemplate();
 
@@ -197,38 +195,133 @@ public class BankAccountController {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<CreditTransactionDTO> creditTrasaction = new HttpEntity<CreditTransactionDTO>(t, headers);
 
-        CreditTransactionDTO result = restTemplate.postForObject(uri + "/transaction/new", creditTrasaction, CreditTransactionDTO.class);
+        CreditTransactionDTO result = restTemplate.postForObject(uri + "/transaction/new", creditTrasaction,
+                CreditTransactionDTO.class);
 
-        //update credit in credit service
-        restTemplate.put(uri + "/credit/pay/"+ creditId + "/" + amount+"/"+ result.getIdCreditTransaction(), null);
+        // update credit in credit service
+        restTemplate.put(uri + "/credit/pay/" + creditId + "/" + amount + "/" + result.getIdCreditTransaction(), null);
 
-        //Generate transaction in bank account service
-        Transaction accountT = new Transaction(amount,"5f09e93a66bb6e3bd0a30c79", Calendar.getInstance().getTime());
+        // Generate transaction in bank account service
+        Transaction accountT = new Transaction(amount, "5f09e93a66bb6e3bd0a30c79", Calendar.getInstance().getTime());
         HttpEntity<Transaction> accountTransaction = new HttpEntity<Transaction>(accountT, headers);
 
-        Transaction resultAccountTransaction = restTemplate.postForObject(accountsUri + "/transaction/new", accountTransaction, Transaction.class);
+        Transaction resultAccountTransaction = restTemplate.postForObject(accountsUri + "/transaction/new",
+                accountTransaction, Transaction.class);
 
-        //withdraw
-        restTemplate.put(accountsUri + "/account/withdraw/"+ accountId +"/" + amount + "/" + resultAccountTransaction.getIdAccountTransaction(), null);
+        // withdraw
+        restTemplate.put(accountsUri + "/account/withdraw/" + accountId + "/" + amount + "/"
+                + resultAccountTransaction.getIdAccountTransaction(), null);
     }
 
-    //search account for this customerId
+    // search account for this customerId
     @GetMapping(value = "/account/search/{customerId}")
-    public Flux<BankAccount> searchAccountsByCustomerId(@PathVariable(name = "customerId") String customerId){
+    public Flux<BankAccount> searchAccountsByCustomerId(@PathVariable(name = "customerId") String customerId) {
         return bankAccountService.searchAccountsByCustomerId(customerId)
-                .defaultIfEmpty(new BankAccount("0",0.0,"No se encontró cuenta bancaria", "NA",null,null,null,0,0.0,"", Calendar.getInstance().getTime()));
+                .defaultIfEmpty(new BankAccount("0", 0.0, "No se encontró cuenta bancaria", "NA", null, null, null, 0,
+                        0, 0.0, "", Calendar.getInstance().getTime()));
     }
 
-    //Bank transfer
+    // Bank transfer
     @GetMapping(value = "/account/bank-transfer/{originAccountId}/{destinyAccountId}/{amount}")
     public Mono<String> bankTransfer(@PathVariable(name = "originAccountId") String originId,
             @PathVariable(name = "destinyAccountId") String destinyId, @PathVariable(name = "amount") Double amount) {
-                
+
         return bankAccountService.bankTransfer(originId, destinyId, amount);
     }
 
     @PostMapping(value = "/account/search/betweenDates/{bankId}")
-    public Flux<AccountDTO> getAccountsBetweenDates(@PathVariable(name = "bankId") String bankId, @RequestBody InitialEndDates dates) {
+    public Flux<AccountDTO> getAccountsBetweenDates(@PathVariable(name = "bankId") String bankId,
+            @RequestBody InitialEndDates dates) {
         return bankAccountService.getAccountsBetweenDates(dates.getInitialDate(), dates.getEndDate(), bankId);
+    }
+
+    // Deposit money form ATM
+    @PutMapping(value = "/account/atm/deposit/{accountId}/{amount}/{transactionId}")
+    public Mono<BankAccount> depositFromATM(@PathVariable(name = "accountId") String accountId,
+            @PathVariable(name = "amount") Double amount, @PathVariable(name = "transactionId") String transactionId) {
+
+        return bankAccountService.findById(accountId).flatMap(existingAccount -> {
+            
+
+            // validate numberOfAtmTransactions
+            int numberOfAtmTransactions = existingAccount.getNumberOfAtmTransactions();
+            String accountTypeId = existingAccount.getAccountType();
+
+            return bankAccountService.getFreeAtmTransactions(accountTypeId).flatMap(accountType -> {
+                Double balance = existingAccount.getAvailableBalance();
+                if (numberOfAtmTransactions >= accountType.getFreeAtmTransactions()) {
+                    // charge commission
+                    balance -= existingAccount.getCommission();
+
+                    // add data to Commission document
+                    Commission commission = new Commission(Calendar.getInstance().getTime(), transactionId, accountId);
+                    commissionService.save(commission).subscribe();
+                } else {
+                    // don't charge commission
+                    existingAccount.setNumberOfAtmTransactions(numberOfAtmTransactions + 1);
+                }
+
+                // update availableBalance
+                existingAccount.setAvailableBalance(balance + amount);
+
+                // update transactions
+                List<String> list;
+                if (existingAccount.getTransactions() != null) {
+                    list = existingAccount.getTransactions();
+                } else {
+                    list = new ArrayList<String>();
+                }
+                list.add(transactionId);
+                existingAccount.setTransactions(list);
+
+                return bankAccountService.save(existingAccount);
+            });
+            
+        });
+    }
+
+    // Withdraw money form ATM
+    @PutMapping(value = "/account/atm/withdraw/{accountId}/{amount}/{transactionId}")
+    public Mono<BankAccount> withdrawFromATM(@PathVariable(name = "accountId") String accountId,
+            @PathVariable(name = "amount") Double amount, @PathVariable(name = "transactionId") String transactionId) {
+
+        return bankAccountService.findById(accountId).flatMap(existingAccount -> {
+            
+
+            // validate numberOfAtmTransactions
+            int numberOfAtmTransactions = existingAccount.getNumberOfAtmTransactions();
+            String accountTypeId = existingAccount.getAccountType();
+
+            return bankAccountService.getFreeAtmTransactions(accountTypeId).flatMap(accountType -> {
+                Double balance = existingAccount.getAvailableBalance();
+                if (numberOfAtmTransactions >= accountType.getFreeAtmTransactions()) {
+                    // charge commission
+                    balance -= existingAccount.getCommission();
+
+                    // add data to Commission document
+                    Commission commission = new Commission(Calendar.getInstance().getTime(), transactionId, accountId);
+                    commissionService.save(commission).subscribe();
+                } else {
+                    // don't charge commission
+                    existingAccount.setNumberOfAtmTransactions(numberOfAtmTransactions + 1);
+                }
+
+                // update availableBalance
+                existingAccount.setAvailableBalance(balance - amount);
+
+                // update transactions
+                List<String> list;
+                if (existingAccount.getTransactions() != null) {
+                    list = existingAccount.getTransactions();
+                } else {
+                    list = new ArrayList<String>();
+                }
+                list.add(transactionId);
+                existingAccount.setTransactions(list);
+
+                return bankAccountService.save(existingAccount);
+            });
+            
+        });
     }
 }
