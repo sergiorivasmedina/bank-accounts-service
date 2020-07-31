@@ -366,4 +366,44 @@ public class BankAccountController {
             
         });
     }
+
+    // Withdraw money form ATM to other bank
+    @PutMapping(value = "/account/atm/otherBank/withdraw/{accountId}/{amount}/{transactionId}")
+    public Mono<BankAccount> withdrawFromOtherBankATM(@PathVariable(name = "accountId") String accountId,
+            @PathVariable(name = "amount") Double amount, @PathVariable(name = "transactionId") String transactionId) {
+
+        return bankAccountService.findById(accountId).flatMap(existingAccount -> {
+
+            Mono<BankDTO> bankDto = WebClient.create(banksUri + "/bank/" + existingAccount.getBankId())
+                                        .get()
+                                        .retrieve()
+                                        .bodyToMono(BankDTO.class);
+            
+            return bankDto.flatMap(bank -> {
+                Double balance = existingAccount.getAvailableBalance();
+                double bankCommission = bank.getDepositFromOtherBankCommission();
+
+                //set commission
+                Commission commission = new Commission(Calendar.getInstance().getTime(), transactionId, accountId);
+                commissionService.save(commission).subscribe();
+
+                //update availableBalance
+                balance = balance - bankCommission;
+                existingAccount.setAvailableBalance(balance - amount);
+
+                // update transactions
+                List<String> list;
+                if (existingAccount.getTransactions() != null) {
+                    list = existingAccount.getTransactions();
+                } else {
+                    list = new ArrayList<String>();
+                }
+                list.add(transactionId);
+                existingAccount.setTransactions(list);
+
+                return bankAccountService.save(existingAccount);
+            });
+            
+        });
+    }
 }
