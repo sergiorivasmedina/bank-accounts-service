@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.core.publisher.Flux;
@@ -181,38 +182,52 @@ public class BankAccountController {
 
     // Pay credit card
     @GetMapping(value = "/account/pay/creditCard/{creditId}/{amount}/{accountId}")
-    public void payCreditCard(@PathVariable(name = "creditId") String creditId,
-            @PathVariable(name = "amount") Double amount, @PathVariable(name = "accountId") String accountId) {
+    public Mono<ResponseEntity<?>> payCreditCard(@PathVariable(name = "creditId") String creditId,
+        @PathVariable(name = "amount") Double amount, @PathVariable(name = "accountId") String accountId) {
 
-        String uri = "http://localhost:8083";
+        String creditsUri = "http://localhost:8083";
         String accountsUri = "http://localhost:8082";
+        //Get account and validate amount vs available balance
+        return bankAccountService.findById(accountId).filter(account -> account.getAvailableBalance() >= amount)
+            // .switchIfEmpty(Mono.just(ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Saldo insuficiente")))
+            .flatMap(account -> {
+                //Create a new account transaction
+                Transaction accountTransaction = new Transaction(amount, "5f09e93a66bb6e3bd0a30c79", Calendar.getInstance().getTime());
+                
+                //generate transaction
+                return WebClient.create(accountsUri + "/transaction/new")
+                    .post()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(BodyInserters.fromValue(accountTransaction))
+                    .retrieve()
+                    .bodyToMono(Transaction.class);
+            }).flatMap(transaction -> {
+                //do withdraw for account
+                WebClient.create(accountsUri + "/account/withdraw/" + accountId + "/" + amount + "/" + transaction.getIdAccountTransaction())
+                    .put()
+                    .retrieve()
+                    .bodyToMono(BankAccount.class)
+                    .subscribe();
 
-        // make a transaction in credit service
-        CreditTransactionDTO t = new CreditTransactionDTO(amount, Calendar.getInstance().getTime(),
+                // make a transaction in credit service
+                CreditTransactionDTO creditTransaction = new CreditTransactionDTO(amount, Calendar.getInstance().getTime(),
                 "5f090fcdd060b215471ec392");
 
-        RestTemplate restTemplate = new RestTemplate();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<CreditTransactionDTO> creditTrasaction = new HttpEntity<CreditTransactionDTO>(t, headers);
-
-        CreditTransactionDTO result = restTemplate.postForObject(uri + "/transaction/new", creditTrasaction,
-                CreditTransactionDTO.class);
-
-        // update credit in credit service
-        restTemplate.put(uri + "/credit/pay/" + creditId + "/" + amount + "/" + result.getIdCreditTransaction(), null);
-
-        // Generate transaction in bank account service
-        Transaction accountT = new Transaction(amount, "5f09e93a66bb6e3bd0a30c79", Calendar.getInstance().getTime());
-        HttpEntity<Transaction> accountTransaction = new HttpEntity<Transaction>(accountT, headers);
-
-        Transaction resultAccountTransaction = restTemplate.postForObject(accountsUri + "/transaction/new",
-                accountTransaction, Transaction.class);
-
-        // withdraw
-        restTemplate.put(accountsUri + "/account/withdraw/" + accountId + "/" + amount + "/"
-                + resultAccountTransaction.getIdAccountTransaction(), null);
+                //generate transaction id
+                return WebClient.create(creditsUri + "/transaction/new")
+                    .post()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(BodyInserters.fromValue(creditTransaction))
+                    .retrieve()
+                    .bodyToMono(CreditTransactionDTO.class);
+            }).flatMap(creditTransaction -> {
+                return WebClient.create(creditsUri + "/credit/pay/" + creditId + "/" + amount + "/" + creditTransaction.getIdCreditTransaction())
+                    .put()
+                    .retrieve()
+                    .bodyToMono(CreditDTO.class);
+            }).flatMap(credit -> {
+                return Mono.just(ResponseEntity.status(HttpStatus.OK).body(credit));
+            });
     }
 
     // search account for this customerId
